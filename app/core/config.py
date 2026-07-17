@@ -50,12 +50,16 @@ class Settings(BaseSettings):
 
     @property
     def sqlalchemy_database_url(self) -> str:
-    """Return the database URL in the string format expected by SQLAlchemy."""
-    url = str(self.database_url)
+        """Return the database URL in the string format expected by SQLAlchemy."""
 
+        url = str(self.database_url)
+        # Force the psycopg 3 driver (psycopg[binary] is installed, not psycopg2).
+        if url.startswith("postgresql+psycopg://"):
+            return url
         if url.startswith("postgresql://"):
-            url = url.replace("postgresql://", "postgresql+psycopg://", 1)
-
+            return url.replace("postgresql://", "postgresql+psycopg://", 1)
+        if url.startswith("postgres://"):
+            return url.replace("postgres://", "postgresql+psycopg://", 1)
         return url
 
     @field_validator("google_sheet_id")
