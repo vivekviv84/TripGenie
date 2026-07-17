@@ -5,13 +5,6 @@ from typing import TypeVar
 import json
 from google.oauth2.service_account import Credentials
 
-from gspread.exceptions import (
-    CellNotFound,
-    GSpreadException,
-    SpreadsheetNotFound,
-    WorksheetNotFound,
-)
-
 import gspread
 from google.auth.exceptions import GoogleAuthError
 from gspread import Spreadsheet, Worksheet
@@ -102,7 +95,7 @@ class GoogleSheetsService:
                 row_number = cell.row
                 if hasattr(lead, "google_sheet_row"):
                     lead.google_sheet_row = row_number
-            except CellNotFound:
+            except Exception:
                 logger.info("Google Sheets row not found; appending conversation_id=%s", lead.conversation_id)
                 self._append_lead_once(lead)
                 return
