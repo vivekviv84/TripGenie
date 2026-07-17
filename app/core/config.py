@@ -50,9 +50,13 @@ class Settings(BaseSettings):
 
     @property
     def sqlalchemy_database_url(self) -> str:
-        """Return the database URL in the string format expected by SQLAlchemy."""
+    """Return the database URL in the string format expected by SQLAlchemy."""
+    url = str(self.database_url)
 
-        return str(self.database_url)
+        if url.startswith("postgresql://"):
+            url = url.replace("postgresql://", "postgresql+psycopg://", 1)
+
+        return url
 
     @field_validator("google_sheet_id")
     @classmethod
