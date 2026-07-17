@@ -17,12 +17,12 @@ logger = get_logger(__name__)
 def authenticate_webhook_request(
     x_api_key: Annotated[str | None, Header(alias="X-API-Key")] = None,
 ) -> None:
-    """Authenticate webhook requests using a shared API key."""
-
     settings = get_settings()
-    configured_key = settings.webhook_api_key
 
-    if not x_api_key or not compare_digest(x_api_key, configured_key):
+    logger.info("Received key: %r", x_api_key)
+    logger.info("Configured key: %r", settings.webhook_api_key)
+
+    if not x_api_key or not compare_digest(x_api_key, settings.webhook_api_key):
         logger.warning("Webhook authentication failed")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -30,7 +30,6 @@ def authenticate_webhook_request(
         )
 
     logger.info("Webhook request authenticated")
-
 
 def authenticate_operations_request(
     x_api_key: Annotated[str | None, Header(alias="X-API-Key")] = None,
