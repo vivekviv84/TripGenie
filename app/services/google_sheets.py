@@ -2,6 +2,16 @@ from collections.abc import Callable
 from time import monotonic, sleep
 from typing import TypeVar
 
+import json
+from google.oauth2.service_account import Credentials
+
+from gspread.exceptions import (
+    CellNotFound,
+    GSpreadException,
+    SpreadsheetNotFound,
+    WorksheetNotFound,
+)
+
 import gspread
 from google.auth.exceptions import GoogleAuthError
 from gspread import Spreadsheet, Worksheet
@@ -119,18 +129,48 @@ class GoogleSheetsService:
         try:
             if not self.settings.google_sheets_enabled:
                 raise ValueError("Google Sheets is disabled")
-            client = gspread.service_account(
-                filename=str(self.settings.google_service_account_file),
-                scopes=list(self.SCOPES),
-            )
+            if self.settings.google_service_account_json:
+                credentials_info = json.loads(
+                    self.settings.google_service_account_json
+                )
+
+                credentials = Credentials.from_service_account_info(
+                    credentials_info,
+                    scopes=list(self.SCOPES),
+                )
+
+                client = gspread.authorize(credentials)
+
+            else:
+                client = gspread.service_account(
+                    filename=str(self.settings.google_service_account_file),
+                    scopes=list(self.SCOPES),
+                )
+
             logger.info("Google Sheets authentication succeeded")
-            spreadsheet: Spreadsheet = client.open_by_key(str(self.settings.google_sheet_id))
-            worksheet = spreadsheet.worksheet(str(self.settings.google_worksheet))
-            logger.info("Google worksheet opened: %s", self.settings.google_worksheet)
+
+            spreadsheet: Spreadsheet = client.open_by_key(
+                str(self.settings.google_sheet_id)
+            )
+
+            worksheet = spreadsheet.worksheet(
+                str(self.settings.google_worksheet)
+            )
+
+            logger.info(
+                "Google worksheet opened: %s",
+                self.settings.google_worksheet,
+            )
             self._ensure_header_row(worksheet)
             self._worksheet = worksheet
             return worksheet
-        except (GoogleAuthError, SpreadsheetNotFound, WorksheetNotFound, GSpreadException):
+
+        except (
+            GoogleAuthError,
+            SpreadsheetNotFound,
+            WorksheetNotFound,
+            GSpreadException,
+        ):
             logger.exception("Google Sheets connection failed")
             raise
 

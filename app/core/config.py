@@ -21,6 +21,7 @@ class Settings(BaseSettings):
     google_sheet_id: str | None = Field(default=None, alias="GOOGLE_SHEET_ID")
     google_worksheet: str | None = Field(default=None, alias="GOOGLE_WORKSHEET")
     google_service_account_file: Path | None = Field(default=None, alias="GOOGLE_SERVICE_ACCOUNT_FILE")
+    google_service_account_json: str | None = Field(default=None,alias="GOOGLE_SERVICE_ACCOUNT_JSON",)
     lead_hot_threshold: int = Field(default=75, alias="LEAD_HOT_THRESHOLD", ge=0, le=100)
     lead_warm_threshold: int = Field(default=45, alias="LEAD_WARM_THRESHOLD", ge=0, le=100)
     lead_high_intent_threshold: int = Field(default=70, alias="LEAD_HIGH_INTENT_THRESHOLD", ge=0, le=100)
@@ -102,7 +103,7 @@ class Settings(BaseSettings):
                 raise ValueError("GOOGLE_SHEET_ID is required when GOOGLE_SHEETS_ENABLED is true")
             if not self.google_worksheet:
                 raise ValueError("GOOGLE_WORKSHEET is required when GOOGLE_SHEETS_ENABLED is true")
-            if self.google_service_account_file is None:
+            if (self.google_service_account_file is None and not self.google_service_account_json):
                 raise ValueError("GOOGLE_SERVICE_ACCOUNT_FILE is required when GOOGLE_SHEETS_ENABLED is true")
         total_weight = (
             self.lead_score_weight_destination
