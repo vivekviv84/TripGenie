@@ -51,10 +51,6 @@ class Settings(BaseSettings):
     @property
     def sqlalchemy_database_url(self) -> str:
         """Return the database URL in the string format expected by SQLAlchemy."""
-<<<<<<< HEAD
-=======
-        url = str(self.database_url)
->>>>>>> 3bcb49d (Fix SQLAlchemy database URL property)
 
         url = str(self.database_url)
         # Force the psycopg 3 driver (psycopg[binary] is installed, not psycopg2).
